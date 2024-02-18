@@ -1,0 +1,27 @@
+﻿@page "/{RoomId:guid}"
+@inherits Chatty.Web.Components.ViewModels.RoomViewModel
+@rendermode InteractiveServer
+
+<h3>Messages</h3>
+
+<div>
+    @if (Messages == null)
+    {
+        <div>Loading</div>
+    }
+    else
+    {
+        @foreach (var current in Messages)
+        {
+            <div>@current.Content</div>
+        }
+    }
+</div>
+
+<div>
+    <label>
+        Message:
+        <InputText @bind-Value="CurrentMessage" />
+    </label>
+    <button @onclick="SendMessage">Send</button>
+</div>
