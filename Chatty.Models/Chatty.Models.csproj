@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Chatty.Database\Chatty.Database.csproj" />
     <ProjectReference Include="..\Chatty.Interfaces\Chatty.Interfaces.csproj" />
   </ItemGroup>
 
