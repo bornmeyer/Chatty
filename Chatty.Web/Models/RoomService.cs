@@ -1,54 +1,52 @@
 ﻿using Chatty.Interfaces;
-using Chatty.Interfaces.DTOs;
-using Chatty.Web.Components.Pages;
-//using Orleans.Stream;
 
 namespace Chatty.Web.Models
 {
-    public class RoomService : IRoomService, IChat
+    public class RoomService : IRoomService, IRoomObserver
     {
         // Events
 
-        public event Action<Message>? OnMessage;
+        public event Action? OnRoomsChanged;
 
         // Fields
 
-        private readonly IClusterClient clusterClient;
-        private IChat? observer = default;
+        private readonly IClusterClient clusterClient = default!;
+        private readonly IRoomObserver observer = default!;
 
         // Constructors
 
         public RoomService(IClusterClient clusterClient)
         {
             this.clusterClient = clusterClient;
+            this.observer = clusterClient.CreateObjectReference<IRoomObserver>(this);
+
         }
 
         // Methods
 
-        public async Task SendMessage(Guid receiver) => throw new NotImplementedException();
-
-        public async Task BroadcastMessage(Guid roomId, String message)
+        public async Task Subscribe()
         {
-            IRoomGrain grain = clusterClient.GetGrain<IRoomGrain>(roomId);            
-            await grain.AppendMessage(message);
+            IRoomRegistrarGrain roomRegistrarGrain =
+                this.clusterClient.GetGrain<IRoomRegistrarGrain>(Guid.Empty);
+            await roomRegistrarGrain.Subscribe(this.observer);
         }
 
-        public async Task<List<Message>> GetMessages(Guid roomId)
+        public async Task Unsubscribe()
         {
-            IRoomGrain grain = clusterClient.GetGrain<IRoomGrain>(roomId);
-            return await grain.GetMessages();
+            IRoomRegistrarGrain roomRegistrarGrain =
+                this.clusterClient.GetGrain<IRoomRegistrarGrain>(Guid.Empty);
+            await roomRegistrarGrain.Unsubscribe(this.observer);
         }
 
-        public async Task ReceiveMessage(Message message)
+        public async Task<IEnumerable<Guid>> GetRoomIds()
         {
-            OnMessage?.Invoke(message);
+            IRoomRegistrarGrain grain = this.clusterClient.GetGrain<IRoomRegistrarGrain>(Guid.Empty);
+            return await grain.GetRooms();
         }
 
-        public async Task Subscribe(Guid roomId)
+        public async Task RoomSubscriptionsChanged()
         {
-            IRoomGrain grain = clusterClient.GetGrain<IRoomGrain>(roomId);
-            observer = clusterClient.CreateObjectReference<IChat>(this);
-            await grain.Subscribe(observer);
+            OnRoomsChanged?.Invoke();
         }
     }
 }

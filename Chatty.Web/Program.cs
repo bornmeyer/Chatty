@@ -14,6 +14,7 @@ builder.Host.UseOrleansClient(builder =>
 .ConfigureServices(services =>
 {
     //services.AddHostedService<IMessagesService, >();
+    services.AddTransient<IMessageService, MessageService>();
     services.AddTransient<IRoomService, RoomService>();
 });
 

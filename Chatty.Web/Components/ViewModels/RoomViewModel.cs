@@ -8,15 +8,19 @@ namespace Chatty.Web.Components.ViewModels
     {
         // Fields
 
-        private readonly IRoomService roomService = default!;
+        private readonly IMessageService roomService = default!;
 
         // Constructors
 
         [Parameter] public Guid? RoomId {  get; set; }
 
+        [Inject] public IMessageService MessageService { get; set; } = default!;
+
         [Inject] public IRoomService RoomService { get; set; } = default!;
 
         public List<Message> Messages { get; set; } = [];
+
+        public IEnumerable<Guid> RoomIds { get; set; } = [];
 
         public String? CurrentMessage { get; set; }
 
@@ -24,17 +28,25 @@ namespace Chatty.Web.Components.ViewModels
 
         public async Task SendMessage()
         {
-            await RoomService?.BroadcastMessage(RoomId ?? Guid.Empty, CurrentMessage);
+            await MessageService?.BroadcastMessage(RoomId ?? Guid.Empty, CurrentMessage);
         }
 
         protected override async Task OnInitializedAsync()
         {            
-            RoomService.OnMessage += RoomService_OnMessage;
+            MessageService.OnMessage += RoomService_OnMessage;
 
-            Messages =  await RoomService?.GetMessages(RoomId ?? Guid.Empty) ?? [];
-            await RoomService.Subscribe(RoomId ?? Guid.Empty);
+            Messages =  await MessageService?.GetMessages(RoomId ?? Guid.Empty) ?? [];
+            RoomIds = await RoomService.GetRoomIds();
+            await RoomService.Subscribe();
+            RoomService.OnRoomsChanged += async () =>
+            {
+                RoomIds = await RoomService.GetRoomIds();
+                await InvokeAsync(StateHasChanged);
+            };
+            await MessageService.Subscribe(RoomId ?? Guid.Empty);
             await InvokeAsync(StateHasChanged);
         }
+              
 
         private void RoomService_OnMessage(Message obj)
         {

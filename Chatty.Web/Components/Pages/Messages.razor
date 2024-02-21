@@ -5,6 +5,19 @@
 <h3>Messages</h3>
 
 <div>
+    @Guid.NewGuid().ToString()
+</div>
+
+<div>
+    <ul>
+        @foreach (var current in RoomIds)
+        {
+            <li><a href=@($"/{current}")> @current.ToString()</a></li>
+        }
+    </ul>
+</div>
+
+<div>
     @if (Messages == null)
     {
         <div>Loading</div>

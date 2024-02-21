@@ -10,6 +10,6 @@ namespace Chatty.Models
 {
     public class RoomState
     {
-        public List<Message> ChatMessages { get; set; } = [];
+        public List<Chatty.Interfaces.DTOs.Message> ChatMessages { get; set; } = [];
     }
 }

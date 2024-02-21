@@ -12,5 +12,7 @@ namespace Chatty.Interfaces
         Task Subscribe(IChat observer);
 
         Task Unsubscribe(IChat observer);
+
+       
     }
 }

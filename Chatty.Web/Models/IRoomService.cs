@@ -1,17 +1,14 @@
 ﻿
-using Chatty.Interfaces.DTOs;
-
 namespace Chatty.Web.Models
 {
     public interface IRoomService
     {
-        event Action<Message>? OnMessage;
+        event Action OnRoomsChanged;
 
-        Task BroadcastMessage(Guid roomId, String message);
-        Task SendMessage(Guid receiver);
+        Task<IEnumerable<Guid>> GetRoomIds();
 
-        Task<List<Message>> GetMessages(Guid roomId);
+        Task Subscribe();
 
-        Task Subscribe(Guid roomId);
+        Task Unsubscribe();
     }
 }
